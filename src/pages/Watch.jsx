@@ -74,8 +74,9 @@ export default function Watch() {
 
   const title = details?.title || details?.name
   const source = SOURCES[activeSource]
-  const embedUrl = type === 'movie' ? source.movie(id) : source.tv(id)
   const year = (details?.release_date || details?.first_air_date || '').slice(0, 4)
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '')
+  const frameUrl = `${base}/watchframe.html?id=${id}&type=${type}&src=${source.key}`
 
   return (
     <div className="min-h-screen bg-[#06060f]">
@@ -140,9 +141,10 @@ export default function Watch() {
           <iframe
             key={iframeKey}
             ref={iframeRef}
-            src={embedUrl}
+            src={frameUrl}
             allowFullScreen
             allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
+            sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
             title={title}
           />
         </div>

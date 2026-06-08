@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #000; overflow: hidden; }
+    iframe { width: 100%; height: 100%; border: none; display: block; }
+  </style>
+</head>
+<body>
+  <script>
+    const p = new URLSearchParams(location.search);
+    const id = p.get('id');
+    const type = p.get('type') || 'movie';
+    const src = p.get('src') || 'vidlink';
+
+    const urls = {
+      vidlink:  type === 'movie' ? `https://vidlink.pro/movie/${id}`                    : `https://vidlink.pro/tv/${id}`,
+      vidsrc:   type === 'movie' ? `https://vidsrc.to/embed/movie/${id}`                : `https://vidsrc.to/embed/tv/${id}`,
+      vidsrc2:  type === 'movie' ? `https://vidsrc.me/embed/movie?tmdb=${id}`           : `https://vidsrc.me/embed/tv?tmdb=${id}`,
+      embedsu:  type === 'movie' ? `https://embed.su/embed/movie/${id}`                 : `https://embed.su/embed/tv/${id}`,
+      twoembed: type === 'movie' ? `https://www.2embed.cc/embed/${id}`                  : `https://www.2embed.cc/embedtv/${id}`,
+    };
+
+    const iframe = document.createElement('iframe');
+    iframe.src = urls[src] || urls.vidlink;
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('allow', 'autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock');
+    document.body.appendChild(iframe);
+  </script>
+</body>
+</html>
