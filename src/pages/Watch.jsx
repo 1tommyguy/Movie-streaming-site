@@ -6,9 +6,16 @@ import DownloadModal from '../components/DownloadModal'
 
 const SOURCES = [
   {
+    key: 'vidlink',
+    name: 'VidLink',
+    tag: 'HD',
+    movie: (id) => `https://vidlink.pro/movie/${id}`,
+    tv: (id) => `https://vidlink.pro/tv/${id}`,
+  },
+  {
     key: 'vidsrc',
     name: 'VidSrc',
-    tag: 'Recommended',
+    tag: null,
     movie: (id) => `https://vidsrc.to/embed/movie/${id}`,
     tv: (id) => `https://vidsrc.to/embed/tv/${id}`,
   },
@@ -25,13 +32,6 @@ const SOURCES = [
     tag: null,
     movie: (id) => `https://embed.su/embed/movie/${id}`,
     tv: (id) => `https://embed.su/embed/tv/${id}`,
-  },
-  {
-    key: 'vidlink',
-    name: 'VidLink',
-    tag: 'HD',
-    movie: (id) => `https://vidlink.pro/movie/${id}`,
-    tv: (id) => `https://vidlink.pro/tv/${id}`,
   },
   {
     key: 'twoembed',
@@ -143,7 +143,6 @@ export default function Watch() {
             src={embedUrl}
             allowFullScreen
             allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
             title={title}
           />
         </div>
