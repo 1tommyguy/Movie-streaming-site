@@ -41,4 +41,6 @@ export const getMovieVideos = (id) => api.get(`/movie/${id}/videos`)
 
 export const getTVVideos = (id) => api.get(`/tv/${id}/videos`)
 
+export const getWatchProviders = (type, id) => api.get(`/${type}/${id}/watch/providers`)
+
 export default api

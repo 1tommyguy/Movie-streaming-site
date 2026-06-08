@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getMovieDetails, getTVDetails, IMG } from '../api/tmdb'
+import { getMovieDetails, getTVDetails, getWatchProviders, IMG } from '../api/tmdb'
 import { useWatchlist } from '../context/WatchlistContext'
 import LoadingSpinner from '../components/LoadingSpinner'
 import MovieRow from '../components/MovieRow'
@@ -11,15 +11,24 @@ export default function Detail({ type }) {
   const navigate = useNavigate()
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist()
   const [details, setDetails] = useState(null)
+  const [providers, setProviders] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showDownload, setShowDownload] = useState(false)
 
   useEffect(() => {
     window.scrollTo(0, 0)
     setLoading(true)
-    const fetch = type === 'movie' ? getMovieDetails : getTVDetails
-    fetch(id)
-      .then((res) => setDetails(res.data))
+    const fetchFn = type === 'movie' ? getMovieDetails : getTVDetails
+    fetchFn(id)
+      .then((res) => {
+        setDetails(res.data)
+        return getWatchProviders(type === 'movie' ? 'movie' : 'tv', id)
+      })
+      .then((res) => {
+        const regionData = res.data.results
+        const region = regionData['US'] || regionData[Object.keys(regionData)[0]] || null
+        setProviders(region)
+      })
       .catch(() => navigate('/'))
       .finally(() => setLoading(false))
   }, [id, type])
@@ -139,6 +148,68 @@ export default function Detail({ type }) {
                 onClose={() => setShowDownload(false)}
               />
             )}
+
+            {/* Where to Watch */}
+            {providers && (providers.flatrate?.length || providers.rent?.length || providers.buy?.length) ? (
+              <div className="mb-8">
+                <h3 className="text-white font-bold mb-4 text-sm uppercase tracking-widest text-primary-light">Where to Watch</h3>
+                <div className="space-y-3">
+                  {providers.flatrate?.length > 0 && (
+                    <div>
+                      <p className="text-gray-600 text-xs uppercase tracking-wider mb-2">Stream</p>
+                      <div className="flex flex-wrap gap-2">
+                        {providers.flatrate.map((p) => (
+                          <a
+                            key={p.provider_id}
+                            href={providers.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={p.provider_name}
+                            className="group relative"
+                          >
+                            <img
+                              src={`https://image.tmdb.org/t/p/original${p.logo_path}`}
+                              alt={p.provider_name}
+                              className="w-10 h-10 rounded-xl object-cover border border-primary/10 group-hover:border-primary/40 group-hover:scale-110 transition-all"
+                            />
+                            <span className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-gray-500 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity">
+                              {p.provider_name}
+                            </span>
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {providers.rent?.length > 0 && (
+                    <div className="pt-2">
+                      <p className="text-gray-600 text-xs uppercase tracking-wider mb-2">Rent</p>
+                      <div className="flex flex-wrap gap-2">
+                        {providers.rent.map((p) => (
+                          <a
+                            key={p.provider_id}
+                            href={providers.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={p.provider_name}
+                            className="group relative"
+                          >
+                            <img
+                              src={`https://image.tmdb.org/t/p/original${p.logo_path}`}
+                              alt={p.provider_name}
+                              className="w-10 h-10 rounded-xl object-cover border border-white/10 group-hover:border-white/30 group-hover:scale-110 transition-all opacity-80 group-hover:opacity-100"
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <p className="text-gray-700 text-xs mt-4 flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  Provider data by TMDB · Availability shown for US
+                </p>
+              </div>
+            ) : null}
 
             {/* Cast */}
             {details.credits?.cast?.length > 0 && (
