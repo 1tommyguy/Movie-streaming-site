@@ -36,6 +36,8 @@ export default function Navbar() {
     { to: '/watchlist', label: 'My List' },
   ]
 
+  const uploadLink = { to: '/upload', label: 'Upload' }
+
   const isActive = (path) => location.pathname === path
 
   return (
@@ -70,6 +72,21 @@ export default function Navbar() {
 
           {/* Right */}
           <div className="flex items-center gap-2">
+            {/* Upload button */}
+            <Link
+              to="/upload"
+              className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all border ${
+                isActive('/upload')
+                  ? 'bg-primary/20 border-primary/40 text-primary-light'
+                  : 'bg-gradient-to-r from-indigo-600/80 to-primary/80 border-primary/40 text-white hover:from-indigo-600 hover:to-primary'
+              }`}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              Upload
+            </Link>
+
             {searchOpen ? (
               <form onSubmit={handleSearch} className="flex items-center gap-1">
                 <input
@@ -136,6 +153,15 @@ export default function Navbar() {
                 {l.label}
               </Link>
             ))}
+            <Link
+              to="/upload"
+              className="flex items-center gap-2 px-4 py-3 mx-2 my-0.5 rounded-lg text-sm font-semibold text-primary-light bg-primary/10 hover:bg-primary/15 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+              Upload Movie
+            </Link>
           </div>
         )}
       </div>

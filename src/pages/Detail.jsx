@@ -4,6 +4,7 @@ import { getMovieDetails, getTVDetails, IMG } from '../api/tmdb'
 import { useWatchlist } from '../context/WatchlistContext'
 import LoadingSpinner from '../components/LoadingSpinner'
 import MovieRow from '../components/MovieRow'
+import DownloadModal from '../components/DownloadModal'
 
 export default function Detail({ type }) {
   const { id } = useParams()
@@ -11,6 +12,7 @@ export default function Detail({ type }) {
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist()
   const [details, setDetails] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [showDownload, setShowDownload] = useState(false)
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -116,7 +118,27 @@ export default function Detail({ type }) {
                   <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg> My List</>
                 )}
               </button>
+
+              <button
+                onClick={() => setShowDownload(true)}
+                className="btn-secondary"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                Download
+              </button>
             </div>
+
+            {showDownload && (
+              <DownloadModal
+                title={title}
+                tmdbId={details.id}
+                type={type}
+                year={year}
+                onClose={() => setShowDownload(false)}
+              />
+            )}
 
             {/* Cast */}
             {details.credits?.cast?.length > 0 && (

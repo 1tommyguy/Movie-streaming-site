@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { WatchlistProvider } from './context/WatchlistContext'
+import { UploadsProvider } from './context/UploadsContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -9,6 +10,8 @@ import Search from './pages/Search'
 import Watchlist from './pages/Watchlist'
 import Detail from './pages/Detail'
 import Watch from './pages/Watch'
+import Upload from './pages/Upload'
+import CommunityWatch from './pages/CommunityWatch'
 
 function Layout({ children }) {
   return (
@@ -24,16 +27,20 @@ export default function App() {
   return (
     <HashRouter>
       <WatchlistProvider>
-        <Routes>
-          <Route path="/watch/:type/:id" element={<Watch />} />
-          <Route path="/" element={<Layout><Home /></Layout>} />
-          <Route path="/movies" element={<Layout><Movies /></Layout>} />
-          <Route path="/tv" element={<Layout><TVShows /></Layout>} />
-          <Route path="/search" element={<Layout><Search /></Layout>} />
-          <Route path="/watchlist" element={<Layout><Watchlist /></Layout>} />
-          <Route path="/movie/:id" element={<Layout><Detail type="movie" /></Layout>} />
-          <Route path="/tv/:id" element={<Layout><Detail type="tv" /></Layout>} />
-        </Routes>
+        <UploadsProvider>
+          <Routes>
+            <Route path="/watch/:type/:id" element={<Watch />} />
+            <Route path="/community/:id" element={<CommunityWatch />} />
+            <Route path="/" element={<Layout><Home /></Layout>} />
+            <Route path="/movies" element={<Layout><Movies /></Layout>} />
+            <Route path="/tv" element={<Layout><TVShows /></Layout>} />
+            <Route path="/search" element={<Layout><Search /></Layout>} />
+            <Route path="/watchlist" element={<Layout><Watchlist /></Layout>} />
+            <Route path="/upload" element={<Layout><Upload /></Layout>} />
+            <Route path="/movie/:id" element={<Layout><Detail type="movie" /></Layout>} />
+            <Route path="/tv/:id" element={<Layout><Detail type="tv" /></Layout>} />
+          </Routes>
+        </UploadsProvider>
       </WatchlistProvider>
     </HashRouter>
   )

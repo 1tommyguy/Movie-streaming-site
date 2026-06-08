@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getMovieDetails, getTVDetails, IMG } from '../api/tmdb'
 import LoadingSpinner from '../components/LoadingSpinner'
+import DownloadModal from '../components/DownloadModal'
 
 export default function Watch() {
   const { type, id } = useParams()
   const navigate = useNavigate()
   const [details, setDetails] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [showDownload, setShowDownload] = useState(false)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -90,10 +92,29 @@ export default function Watch() {
               <span className="text-gray-500">{(details?.release_date || details?.first_air_date || '').slice(0, 4)}</span>
               <span className="genre-tag">{type === 'tv' ? 'TV Show' : 'Movie'}</span>
             </div>
-            <p className="text-gray-400 text-sm leading-relaxed max-w-2xl">{details?.overview}</p>
+            <p className="text-gray-400 text-sm leading-relaxed max-w-2xl mb-5">{details?.overview}</p>
+            <button
+              onClick={() => setShowDownload(true)}
+              className="btn-secondary inline-flex"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download
+            </button>
           </div>
         </div>
       </div>
+
+      {showDownload && details && (
+        <DownloadModal
+          title={title}
+          tmdbId={details.id}
+          type={type}
+          year={(details.release_date || details.first_air_date || '').slice(0, 4)}
+          onClose={() => setShowDownload(false)}
+        />
+      )}
     </div>
   )
 }
