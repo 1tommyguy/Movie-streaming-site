@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getMovieDetails, getTVDetails, IMG } from '../api/tmdb'
 import LoadingSpinner from '../components/LoadingSpinner'
@@ -50,7 +50,6 @@ export default function Watch() {
   const [showDownload, setShowDownload] = useState(false)
   const [activeSource, setActiveSource] = useState(0)
   const [iframeKey, setIframeKey] = useState(0)
-  const iframeRef = useRef(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -74,9 +73,8 @@ export default function Watch() {
 
   const title = details?.title || details?.name
   const source = SOURCES[activeSource]
+  const embedUrl = type === 'movie' ? source.movie(id) : source.tv(id)
   const year = (details?.release_date || details?.first_air_date || '').slice(0, 4)
-  const base = import.meta.env.BASE_URL.replace(/\/$/, '')
-  const frameUrl = `${base}/watchframe.html?id=${id}&type=${type}&src=${source.key}`
 
   return (
     <div className="min-h-screen bg-[#06060f]">
@@ -102,6 +100,19 @@ export default function Watch() {
             {title}
           </span>
         )}
+
+        {/* Open in new tab button */}
+        <a
+          href={embedUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="ml-auto flex items-center gap-1.5 bg-gradient-to-r from-indigo-600 to-primary text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:opacity-90 transition-opacity"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+          </svg>
+          <span className="hidden sm:inline">Full Screen</span>
+        </a>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6">
@@ -140,24 +151,26 @@ export default function Watch() {
         >
           <iframe
             key={iframeKey}
-            ref={iframeRef}
-            src={frameUrl}
+            src={embedUrl}
             allowFullScreen
             allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
-            sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
             title={title}
           />
         </div>
 
-        {/* Source not working tip */}
-        <div className="flex items-start gap-2 bg-[#0e0e1c] border border-primary/10 rounded-xl px-4 py-3 mb-8">
-          <svg className="w-4 h-4 text-primary/60 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        {/* Tip */}
+        <div className="flex items-start gap-3 bg-[#0e0e1c] border border-amber-500/15 rounded-xl px-4 py-3 mb-8">
+          <svg className="w-4 h-4 text-amber-400/70 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          <p className="text-gray-500 text-xs leading-relaxed">
-            If this source isn't loading or showing an error, try switching to a different source above.
-            Different sources carry different movies — if one doesn't have it, another likely will.
-          </p>
+          <div className="space-y-1">
+            <p className="text-amber-400/80 text-xs font-semibold">On mobile — use the Full Screen button</p>
+            <p className="text-gray-500 text-xs leading-relaxed">
+              Tap the <strong className="text-gray-400">Full Screen</strong> button in the top-right to open the player in a new tab.
+              You'll get proper volume controls, fullscreen, and no ad redirects.
+              If a source doesn't load, try a different one above.
+            </p>
+          </div>
         </div>
 
         {/* Info */}
