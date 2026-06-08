@@ -7,7 +7,8 @@ import { useDebounce } from '../hooks/useDebounce'
 
 export default function Search() {
   const [searchParams, setSearchParams] = useSearchParams()
-  const [query, setQuery] = useState(searchParams.get('q') || '')
+  const initialQ = searchParams.get('q') || ''
+  const [query, setQuery] = useState(initialQ)
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
@@ -42,7 +43,7 @@ export default function Search() {
     doSearch(debouncedQuery, next)
   }
 
-  const filtered = results.filter((r) => (r.media_type === 'movie' || r.media_type === 'tv') && r.poster_path)
+  const filtered = results.filter((r) => r.media_type === 'movie' || r.media_type === 'tv')
 
   return (
     <div className="min-h-screen bg-[#141414] pt-20 pb-12">
@@ -63,9 +64,9 @@ export default function Search() {
         </div>
 
         {debouncedQuery && (
-          <p className="text-gray-400 text-sm mb-6">
-            {loading && results.length === 0 ? 'Searching...' : `${filtered.length} results for "${debouncedQuery}"`}
-          </p>
+          <h2 className="text-gray-400 text-sm mb-6">
+            {loading ? 'Searching...' : `${filtered.length} results for "${debouncedQuery}"`}
+          </h2>
         )}
 
         {!debouncedQuery && (
@@ -76,23 +77,19 @@ export default function Search() {
           </div>
         )}
 
-        {loading && results.length === 0 ? (
-          <LoadingSpinner />
-        ) : (
+        {loading && results.length === 0 ? <LoadingSpinner /> : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {filtered.map((item) => (
-                <MovieCard key={`${item.id}-${item.media_type}`} item={item} type={item.media_type} />
+                <div key={`${item.id}-${item.media_type}`} style={{ width: '100%' }}>
+                  <MovieCard item={item} type={item.media_type} />
+                </div>
               ))}
             </div>
 
             {page < totalPages && debouncedQuery && (
               <div className="flex justify-center mt-10">
-                <button
-                  onClick={loadMore}
-                  disabled={loading}
-                  className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
-                >
+                <button onClick={loadMore} disabled={loading} className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50">
                   {loading ? 'Loading...' : 'Load More'}
                 </button>
               </div>

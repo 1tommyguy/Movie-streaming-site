@@ -39,15 +39,12 @@ export default function Watch() {
     <div className="min-h-screen bg-black">
       {/* Top bar */}
       <div className="flex items-center gap-4 px-4 py-3 bg-[#141414] border-b border-gray-800">
-        <button
-          onClick={() => navigate(-1)}
-          className="text-gray-400 hover:text-white transition-colors"
-        >
+        <button onClick={() => navigate(-1)} className="text-gray-400 hover:text-white transition-colors">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <span className="text-[#E50914] font-black text-lg">CINE</span>
           <span className="text-white font-black text-lg">STREAM</span>
         </div>
@@ -57,9 +54,9 @@ export default function Watch() {
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Player */}
         {activeVideo ? (
-          <div className="video-container rounded-xl overflow-hidden shadow-2xl mb-6 border border-gray-800">
+          <div className="video-container rounded-xl overflow-hidden shadow-2xl mb-6">
             <iframe
-              src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1&rel=0&modestbranding=1`}
+              src={`https://www.youtube.com/embed/${activeVideo}?autoplay=1&rel=0`}
               allowFullScreen
               allow="autoplay; encrypted-media"
               title={title}
@@ -69,11 +66,14 @@ export default function Watch() {
           <div className="aspect-video bg-gray-900 rounded-xl flex flex-col items-center justify-center mb-6 border border-gray-800">
             <div className="text-5xl mb-4">🎬</div>
             <h3 className="text-white text-xl font-semibold mb-2">No videos available</h3>
-            <p className="text-gray-500 text-sm">No trailers or clips found for this title.</p>
+            <p className="text-gray-500 text-sm mb-4">No trailers or clips found for this title.</p>
+            {details?.backdrop_path && (
+              <img src={IMG.backdrop(details.backdrop_path)} alt={title} className="absolute inset-0 w-full h-full object-cover opacity-10 rounded-xl" />
+            )}
           </div>
         )}
 
-        {/* Info + video list */}
+        {/* Info */}
         <div className="flex flex-col lg:flex-row gap-6">
           <div className="flex-1">
             <h1 className="text-white text-2xl font-bold mb-1">{title}</h1>
@@ -92,19 +92,16 @@ export default function Watch() {
             <p className="text-gray-400 text-sm leading-relaxed">{details?.overview}</p>
           </div>
 
+          {/* Video list */}
           {videos.length > 1 && (
-            <div className="lg:w-80 flex-shrink-0">
+            <div className="lg:w-80">
               <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider">More Videos</h3>
               <div className="space-y-2 max-h-64 overflow-y-auto scrollbar-hide">
                 {videos.map((v) => (
                   <button
                     key={v.key}
                     onClick={() => setActiveVideo(v.key)}
-                    className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-colors ${
-                      activeVideo === v.key
-                        ? 'bg-[#E50914]/20 border border-[#E50914]/40'
-                        : 'bg-gray-800/50 hover:bg-gray-800 border border-transparent'
-                    }`}
+                    className={`w-full flex items-center gap-3 p-2 rounded-lg text-left transition-colors ${activeVideo === v.key ? 'bg-[#E50914]/20 border border-[#E50914]/40' : 'bg-gray-800/50 hover:bg-gray-800 border border-transparent'}`}
                   >
                     <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
                       <svg className="w-4 h-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24">

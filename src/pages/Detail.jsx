@@ -18,8 +18,8 @@ export default function Detail({ type }) {
     window.scrollTo(0, 0)
     setLoading(true)
     setShowTrailer(false)
-    const fetchFn = type === 'movie' ? getMovieDetails : getTVDetails
-    fetchFn(id)
+    const fetch = type === 'movie' ? getMovieDetails : getTVDetails
+    fetch(id)
       .then((res) => {
         setDetails(res.data)
         const videos = res.data.videos?.results || []
@@ -41,7 +41,7 @@ export default function Detail({ type }) {
     ? `${details.number_of_seasons} Season${details.number_of_seasons > 1 ? 's' : ''}`
     : ''
   const year = (details.release_date || details.first_air_date || '').slice(0, 4)
-  const similar = details.recommendations?.results || details.similar?.results || []
+  const similar = details.similar?.results || details.recommendations?.results || []
 
   return (
     <div className="min-h-screen bg-[#141414]">
@@ -56,17 +56,15 @@ export default function Detail({ type }) {
 
         {showTrailer && trailer && (
           <div className="absolute inset-0 bg-black z-10">
-            <iframe
-              src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1`}
-              allowFullScreen
-              allow="autoplay"
-              className="w-full h-full"
-              title={title}
-            />
-            <button
-              onClick={() => setShowTrailer(false)}
-              className="absolute top-4 right-4 bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center z-20 hover:bg-black"
-            >
+            <div className="video-container h-full" style={{ paddingBottom: '0', height: '100%' }}>
+              <iframe
+                src={`https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=0`}
+                allowFullScreen
+                allow="autoplay"
+                className="w-full h-full"
+              />
+            </div>
+            <button onClick={() => setShowTrailer(false)} className="absolute top-4 right-4 bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center z-20 hover:bg-black">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -75,15 +73,15 @@ export default function Detail({ type }) {
         )}
       </div>
 
-      {/* Details content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-48 relative z-10 pb-12">
+      {/* Details */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-40 relative z-10 pb-12">
         <div className="flex flex-col md:flex-row gap-8">
           {/* Poster */}
           <div className="hidden md:block flex-shrink-0">
             <img
               src={IMG.poster(details.poster_path, 'w342')}
               alt={title}
-              className="w-52 rounded-xl shadow-2xl border border-gray-800"
+              className="w-52 rounded-xl shadow-2xl"
             />
           </div>
 
@@ -91,9 +89,7 @@ export default function Detail({ type }) {
           <div className="flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-2">
               {details.genres?.map((g) => (
-                <span key={g.id} className="bg-[#E50914]/20 text-[#E50914] border border-[#E50914]/30 text-xs px-2 py-0.5 rounded-full font-medium">
-                  {g.name}
-                </span>
+                <span key={g.id} className="bg-[#E50914]/20 text-[#E50914] border border-[#E50914]/30 text-xs px-2 py-0.5 rounded-full font-medium">{g.name}</span>
               ))}
             </div>
 
@@ -101,7 +97,7 @@ export default function Detail({ type }) {
 
             <div className="flex items-center flex-wrap gap-4 text-sm text-gray-400 mb-4">
               {details.vote_average > 0 && (
-                <span className="flex items-center gap-1 text-yellow-400 font-semibold">
+                <span className="flex items-center gap-1 text-yellow-400">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                   </svg>
@@ -110,9 +106,7 @@ export default function Detail({ type }) {
               )}
               {year && <span>{year}</span>}
               {runtime && <span>{runtime}</span>}
-              {details.status && (
-                <span className="bg-gray-800 px-2 py-0.5 rounded text-xs">{details.status}</span>
-              )}
+              {details.status && <span className="bg-gray-800 px-2 py-0.5 rounded text-xs">{details.status}</span>}
             </div>
 
             <p className="text-gray-300 text-base leading-relaxed mb-6 max-w-2xl">{details.overview}</p>
@@ -127,9 +121,16 @@ export default function Detail({ type }) {
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M8 5v14l11-7z" />
                   </svg>
-                  Play Trailer
+                  Watch Trailer
                 </button>
-              ) : null}
+              ) : (
+                <button className="flex items-center gap-2 bg-white/20 text-white font-bold px-6 py-3 rounded-lg cursor-not-allowed opacity-50">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  No Trailer
+                </button>
+              )}
 
               <button
                 onClick={() => navigate(`/watch/${type}/${details.id}${trailer ? `?key=${trailer.key}` : ''}`)}
@@ -142,47 +143,27 @@ export default function Detail({ type }) {
               </button>
 
               <button
-                onClick={() =>
-                  inList
-                    ? removeFromWatchlist(details.id)
-                    : addToWatchlist({ ...details, media_type: type })
-                }
+                onClick={() => inList ? removeFromWatchlist(details.id) : addToWatchlist({ ...details, media_type: type })}
                 className={`flex items-center gap-2 font-semibold px-5 py-3 rounded-lg border transition-colors ${inList ? 'bg-[#E50914] border-[#E50914] text-white' : 'bg-transparent border-gray-600 text-white hover:border-white'}`}
               >
                 {inList ? (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    In My List
-                  </>
+                  <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> In My List</>
                 ) : (
-                  <>
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    My List
-                  </>
+                  <><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg> My List</>
                 )}
               </button>
             </div>
 
             {/* Cast */}
             {details.credits?.cast?.length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-white font-semibold mb-3 text-sm uppercase tracking-wider text-gray-400">
-                  Cast
-                </h3>
+              <div className="mb-6">
+                <h3 className="text-white font-semibold mb-2 text-sm uppercase tracking-wider">Cast</h3>
                 <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2">
-                  {details.credits.cast.slice(0, 12).map((person) => (
+                  {details.credits.cast.slice(0, 10).map((person) => (
                     <div key={person.id} className="flex-shrink-0 text-center" style={{ width: '72px' }}>
                       <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-800 mx-auto mb-1">
                         {person.profile_path ? (
-                          <img
-                            src={IMG.poster(person.profile_path, 'w185')}
-                            alt={person.name}
-                            className="w-full h-full object-cover"
-                          />
+                          <img src={IMG.poster(person.profile_path, 'w185')} alt={person.name} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-gray-600">
                             <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">

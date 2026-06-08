@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { WatchlistProvider } from './context/WatchlistContext'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
@@ -22,7 +22,7 @@ function Layout({ children }) {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <WatchlistProvider>
         <Routes>
           <Route path="/watch/:type/:id" element={<Watch />} />
@@ -35,6 +35,6 @@ export default function App() {
           <Route path="/tv/:id" element={<Layout><Detail type="tv" /></Layout>} />
         </Routes>
       </WatchlistProvider>
-    </BrowserRouter>
+    </HashRouter>
   )
 }

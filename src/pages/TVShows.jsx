@@ -34,9 +34,9 @@ export default function TVShows() {
     if (p === 1) setLoading(true)
     else setLoadingMore(true)
     try {
-      const res = selectedGenre
-        ? await getTVByGenre(selectedGenre, p)
-        : await getTVShows(selectedCategory)
+      let res
+      if (selectedGenre) res = await getTVByGenre(selectedGenre, p)
+      else res = await getTVShows(selectedCategory)
       setTotalPages(res.data.total_pages || 1)
       if (reset) setShows(res.data.results)
       else setShows((prev) => [...prev, ...res.data.results])
@@ -81,22 +81,18 @@ export default function TVShows() {
           ))}
         </div>
 
-        {loading ? (
-          <LoadingSpinner />
-        ) : (
+        {loading ? <LoadingSpinner /> : (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {shows.map((s) => (
-                <MovieCard key={s.id} item={s} type="tv" />
+                <div key={s.id} style={{ width: '100%' }}>
+                  <MovieCard item={s} type="tv" />
+                </div>
               ))}
             </div>
             {page < totalPages && (
               <div className="flex justify-center mt-10">
-                <button
-                  onClick={loadMore}
-                  disabled={loadingMore}
-                  className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
-                >
+                <button onClick={loadMore} disabled={loadingMore} className="bg-gray-800 hover:bg-gray-700 text-white px-8 py-3 rounded-lg font-medium transition-colors disabled:opacity-50">
                   {loadingMore ? 'Loading...' : 'Load More'}
                 </button>
               </div>
