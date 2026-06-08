@@ -142,9 +142,9 @@ export default function Watch() {
             ref={iframeRef}
             src={embedUrl}
             allowFullScreen
-            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+            allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
             title={title}
-            referrerPolicy="origin"
           />
         </div>
 
