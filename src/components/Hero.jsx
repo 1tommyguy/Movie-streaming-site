@@ -16,7 +16,7 @@ export default function Hero({ items }) {
 
   if (!items || items.length === 0) {
     return (
-      <div className="h-[70vh] bg-gray-900 shimmer flex items-center justify-center">
+      <div className="h-[70vh] shimmer flex items-center justify-center">
         <div className="text-gray-600 text-xl">Loading...</div>
       </div>
     )
@@ -27,42 +27,61 @@ export default function Hero({ items }) {
   const title = item.title || item.name
   const backdrop = IMG.backdrop(item.backdrop_path)
   const inList = isInWatchlist(item.id)
+  const rating = item.vote_average ? item.vote_average.toFixed(1) : null
 
   return (
-    <div className="relative h-[70vh] sm:h-[80vh] overflow-hidden">
+    <div className="relative h-[75vh] sm:h-[85vh] overflow-hidden">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+        className="absolute inset-0 bg-cover bg-center transition-all duration-1000 scale-105"
         style={{ backgroundImage: `url(${backdrop})` }}
       />
 
       {/* Gradient overlays */}
       <div className="absolute inset-0 hero-gradient" />
-      <div className="absolute bottom-0 left-0 right-0 h-32 hero-bottom-gradient" />
+      <div className="absolute bottom-0 left-0 right-0 h-48 hero-bottom-gradient" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#06060f] via-transparent to-[#06060f]/30" />
 
       {/* Content */}
-      <div className="relative h-full flex items-end pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="max-w-lg fade-in" key={item.id}>
-          <span className="inline-block bg-[#E50914] text-white text-xs font-bold px-2.5 py-1 rounded mb-3 uppercase tracking-wide">
-            {mediaType === 'tv' ? 'TV Show' : 'Movie'} • Trending
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-black text-white mb-3 leading-tight">{title}</h1>
-          <p className="text-gray-300 text-sm sm:text-base mb-6 line-clamp-3">{item.overview}</p>
+      <div className="relative h-full flex items-end pb-20 sm:pb-28 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="max-w-xl fade-in" key={item.id}>
+          {/* Badge */}
+          <div className="flex items-center gap-2 mb-4">
+            <span className="inline-flex items-center gap-1.5 bg-primary/20 border border-primary/40 text-primary-light text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              {mediaType === 'tv' ? 'TV Show' : 'Movie'} • Trending
+            </span>
+            {rating && (
+              <span className="rating-badge text-xs font-bold px-2.5 py-1.5 rounded-full flex items-center gap-1">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+                {rating}
+              </span>
+            )}
+          </div>
+
+          <h1 className="text-4xl sm:text-6xl font-black text-white mb-4 leading-tight tracking-tight">
+            {title}
+          </h1>
+          <p className="text-gray-300 text-sm sm:text-base mb-8 line-clamp-3 leading-relaxed max-w-lg">
+            {item.overview}
+          </p>
 
           <div className="flex items-center gap-3 flex-wrap">
             <button
-              onClick={() => navigate(`/${mediaType}/${item.id}`)}
-              className="flex items-center gap-2 bg-white text-black font-bold px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors"
+              onClick={() => navigate(`/watch/${mediaType}/${item.id}`)}
+              className="btn-primary pulse-glow"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
-              Play
+              Watch Now
             </button>
 
             <button
               onClick={() => navigate(`/${mediaType}/${item.id}`)}
-              className="flex items-center gap-2 bg-white/20 backdrop-blur text-white font-semibold px-6 py-3 rounded-lg hover:bg-white/30 transition-colors border border-white/20"
+              className="btn-secondary"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -72,7 +91,11 @@ export default function Hero({ items }) {
 
             <button
               onClick={() => inList ? removeFromWatchlist(item.id) : addToWatchlist({ ...item, media_type: mediaType })}
-              className={`flex items-center gap-2 font-semibold px-4 py-3 rounded-lg transition-colors border ${inList ? 'bg-[#E50914] border-[#E50914] text-white' : 'bg-transparent border-white/40 text-white hover:border-white'}`}
+              className={`flex items-center gap-2 font-semibold px-4 py-3 rounded-lg transition-all border ${
+                inList
+                  ? 'bg-primary/20 border-primary/50 text-primary-light'
+                  : 'bg-transparent border-white/20 text-white hover:border-primary/50 hover:bg-primary/10'
+              }`}
             >
               {inList ? (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,12 +113,16 @@ export default function Hero({ items }) {
       </div>
 
       {/* Dots */}
-      <div className="absolute bottom-4 right-8 flex gap-1.5">
+      <div className="absolute bottom-6 right-6 sm:right-10 flex gap-2 items-center">
         {items.slice(0, 5).map((_, i) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}
-            className={`h-1 rounded-full transition-all ${i === current ? 'bg-[#E50914] w-6' : 'bg-white/40 w-2'}`}
+            className={`h-1.5 rounded-full transition-all duration-300 ${
+              i === current
+                ? 'bg-gradient-to-r from-indigo-500 to-primary w-8'
+                : 'bg-white/25 w-2 hover:bg-white/50'
+            }`}
           />
         ))}
       </div>

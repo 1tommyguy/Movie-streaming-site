@@ -12,7 +12,7 @@ import Watch from './pages/Watch'
 
 function Layout({ children }) {
   return (
-    <div className="flex flex-col min-h-screen bg-[#141414]">
+    <div className="flex flex-col min-h-screen bg-[#06060f]">
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
