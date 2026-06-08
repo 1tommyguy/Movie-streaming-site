@@ -1,8 +1,46 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getMovieDetails, getTVDetails, IMG } from '../api/tmdb'
 import LoadingSpinner from '../components/LoadingSpinner'
 import DownloadModal from '../components/DownloadModal'
+
+const SOURCES = [
+  {
+    key: 'vidsrc',
+    name: 'VidSrc',
+    tag: 'Recommended',
+    movie: (id) => `https://vidsrc.to/embed/movie/${id}`,
+    tv: (id) => `https://vidsrc.to/embed/tv/${id}`,
+  },
+  {
+    key: 'vidsrc2',
+    name: 'VidSrc 2',
+    tag: null,
+    movie: (id) => `https://vidsrc.me/embed/movie?tmdb=${id}`,
+    tv: (id) => `https://vidsrc.me/embed/tv?tmdb=${id}`,
+  },
+  {
+    key: 'embedsu',
+    name: 'Embed.su',
+    tag: null,
+    movie: (id) => `https://embed.su/embed/movie/${id}`,
+    tv: (id) => `https://embed.su/embed/tv/${id}`,
+  },
+  {
+    key: 'vidlink',
+    name: 'VidLink',
+    tag: 'HD',
+    movie: (id) => `https://vidlink.pro/movie/${id}`,
+    tv: (id) => `https://vidlink.pro/tv/${id}`,
+  },
+  {
+    key: 'twoembed',
+    name: '2Embed',
+    tag: null,
+    movie: (id) => `https://www.2embed.cc/embed/${id}`,
+    tv: (id) => `https://www.2embed.cc/embedtv/${id}`,
+  },
+]
 
 export default function Watch() {
   const { type, id } = useParams()
@@ -10,6 +48,9 @@ export default function Watch() {
   const [details, setDetails] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showDownload, setShowDownload] = useState(false)
+  const [activeSource, setActiveSource] = useState(0)
+  const [iframeKey, setIframeKey] = useState(0)
+  const iframeRef = useRef(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -24,12 +65,17 @@ export default function Watch() {
     fetchData()
   }, [id, type])
 
+  const switchSource = (index) => {
+    setActiveSource(index)
+    setIframeKey((k) => k + 1)
+  }
+
   if (loading) return <LoadingSpinner fullPage />
 
   const title = details?.title || details?.name
-  const embedUrl = type === 'movie'
-    ? `https://vidsrc.to/embed/movie/${id}`
-    : `https://vidsrc.to/embed/tv/${id}`
+  const source = SOURCES[activeSource]
+  const embedUrl = type === 'movie' ? source.movie(id) : source.tv(id)
+  const year = (details?.release_date || details?.first_air_date || '').slice(0, 4)
 
   return (
     <div className="min-h-screen bg-[#06060f]">
@@ -58,15 +104,59 @@ export default function Watch() {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6">
+        {/* Source picker */}
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <span className="text-gray-500 text-xs uppercase tracking-wider font-semibold mr-1">Source:</span>
+          {SOURCES.map((s, i) => (
+            <button
+              key={s.key}
+              onClick={() => switchSource(i)}
+              className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                i === activeSource
+                  ? 'bg-primary/20 border-primary/50 text-primary-light'
+                  : 'bg-[#0e0e1c] border-primary/10 text-gray-400 hover:border-primary/30 hover:text-white'
+              }`}
+            >
+              {i === activeSource && (
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+              )}
+              {s.name}
+              {s.tag && (
+                <span className={`text-[10px] font-bold px-1 py-0 rounded ${
+                  s.tag === 'HD' ? 'text-cyan-400 bg-cyan-400/10' : 'text-amber-400 bg-amber-400/10'
+                }`}>
+                  {s.tag}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
         {/* Player */}
-        <div className="video-container rounded-2xl overflow-hidden shadow-2xl mb-8" style={{ boxShadow: '0 0 60px rgba(139,92,246,0.2)' }}>
+        <div
+          className="video-container rounded-2xl overflow-hidden mb-4"
+          style={{ boxShadow: '0 0 60px rgba(139,92,246,0.2)' }}
+        >
           <iframe
+            key={iframeKey}
+            ref={iframeRef}
             src={embedUrl}
             allowFullScreen
-            allow="autoplay; encrypted-media; fullscreen"
+            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
             title={title}
             referrerPolicy="origin"
           />
+        </div>
+
+        {/* Source not working tip */}
+        <div className="flex items-start gap-2 bg-[#0e0e1c] border border-primary/10 rounded-xl px-4 py-3 mb-8">
+          <svg className="w-4 h-4 text-primary/60 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-gray-500 text-xs leading-relaxed">
+            If this source isn't loading or showing an error, try switching to a different source above.
+            Different sources carry different movies — if one doesn't have it, another likely will.
+          </p>
         </div>
 
         {/* Info */}
@@ -89,8 +179,12 @@ export default function Watch() {
                   {details.vote_average.toFixed(1)}
                 </span>
               )}
-              <span className="text-gray-500">{(details?.release_date || details?.first_air_date || '').slice(0, 4)}</span>
+              {year && <span className="text-gray-500">{year}</span>}
               <span className="genre-tag">{type === 'tv' ? 'TV Show' : 'Movie'}</span>
+              <span className="text-gray-600 text-xs flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500/60" />
+                Playing via {source.name}
+              </span>
             </div>
             <p className="text-gray-400 text-sm leading-relaxed max-w-2xl mb-5">{details?.overview}</p>
             <button
@@ -111,7 +205,7 @@ export default function Watch() {
           title={title}
           tmdbId={details.id}
           type={type}
-          year={(details.release_date || details.first_air_date || '').slice(0, 4)}
+          year={year}
           onClose={() => setShowDownload(false)}
         />
       )}
